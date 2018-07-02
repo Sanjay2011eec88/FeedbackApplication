@@ -16,7 +16,8 @@ app.get('/', (req, res) => {
 * "node":"8.1.1",
 * "npm":"5.0.3"
 * }*
-* 3.Specify a start script/
+* 3.Specify a start script
+* /
 
 //We can set the port by using env varibales or it will be 5000
 const PORT  = process.env.PORT || 5000;
