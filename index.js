@@ -1,34 +1,30 @@
 const express = require('express');
+const mongoose = require('mongoose');
+const cookieSession = require('cookie-session');
 const passport = require('passport');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const keys = require('./config/keys');
+const authRoutes = require('./routes/authRoutes');
+
+require('./models/User');
+require('./services/passport');
+
+
+mongoose.connect(keys.mongoURI);
 
 //We can multiple application in single project by using the express
 const app = express();
 
-//callbackUrl is for when user provides the access to the google account data it will route this url
-passport.use(
-    new GoogleStrategy(
-    {
-        clientID: keys.googleClientID,
-        clientSecret: keys.googleClientSecret,
-        callbackURL:'/auth/google/callback'
-    }, (accessToken, refreshToken, profile, done) =>{
-        console.log(accessToken)
+app.use(
+    cookieSession({
+        maxAge:30 * 24 * 60 * 60 * 1000,
+        keys: [keys.cookieKey]
     })
 );
 
+app.use(passport.initialize());
+app.use(passport.session());
 
-//Scopes gives access to the list in the scope from the google after user gives permission
-app.get(
-    '/auth/google',
-    passport.authenticate('google',{
-        scope: ['profile', 'email']
-    })
-);
-
-//this the second request where we receive code and that code to get the profile data usig passport using google
-app.get('/auth/google/callback', passport.authenticate('google'));
+authRoutes(app);
 
 //We can set the port by using env varibales or it will be 5000
 const PORT  = process.env.PORT || 5000;
